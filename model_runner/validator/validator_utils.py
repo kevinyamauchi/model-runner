@@ -1,25 +1,3 @@
-# input: path to settings file (e.g. .json file)
-#   1. path to data --> test: string, path exists OK
-#   2. program to run --> test: string, file exists OK
-#   3. settings for job array
-#     * #gpus --> test: int OK
-#     * gpu type --> test: str, in list of existing GPUs OK
-#     * #processor cores: --> test: int OK
-#     * memory per processor core --> test: int OK
-#     * scratch per processor core --> test: int OK
-#     * run_time --> test: str or int, either in min or [h] format OK
-#     * #jobs to run --> test: int OK
-#     * #jobs to run in parallel --> test: int OK
-#     * log-file name template --> test: str OK
-#   4. hyper-parameter margins (+dtype) --> test: Dict[str, List[Any]], OK
-# output: None
-
-# NOTE: for now the hyper-parameter grid has to be submitted explicitly
-# TODO: later patch explicit version to also accomodate continuous ranges, discrete variables, ...
-# TODO: include feature to check if required resources can be allocated to a single machine or require multiple machines
-# TODO: set up tests for input function in _tests
-# TODO: include type coercion
-
 import os
 from typing import Any, Dict, List, Union
 
@@ -27,20 +5,54 @@ from pydantic import BaseModel, validator
 
 
 class JobArrayModel(BaseModel):
+    """
+    pydantic BaseModel that handles the job_parameters.
+
+    Parameters
+    ----------
+    run_time: Union[str, int]
+        The time resources on the compute note are reservered for a single job. Corresponds to the bsub "-W"-flag.
+    processor_cores: int
+        Number of processor cores requested for a single job. Corresponds to the bsub "-n"-flag.
+    memory: int
+        Amount of memory requested per processor core. Corresponds to bsub -R "rusage[mem={memory}]".
+    scratch: int
+        Amount of local scratch requested per processor core. Corresponds to bsub -R "rusage[scratch={scratch}]".
+    gpu_type: str
+        Type of gpu that is accepted by bsub -R "select[gpu_model0=={gpu_type}]".
+    ngpus: int
+        Number of GPUs of {gpu_type} requested. Corresponds to bsub -R "rusage[ngpus_excl_p={ngpus}]".
+    njobs_parallel: int
+        Number of jobs the job array will submit in parallel.
+    logfile_dir: str
+        Path to directory to which lsf output files are saved.
+    """
+
     run_time: Union[str, int]
     processor_cores: int
     memory: int
     scratch: int
     gpu_type: str
     ngpus: int
-    njobs: int
     njobs_parallel: int
-    logfile_name_template: str
+    logfile_dir: str
+
+    @validator("logfile_dir")
+    def logfile_dir_is_dir(cls, v):
+        """
+        Validate if logfile_dir is an existing directory.
+        """
+        if not os.path.isdir(v):
+            raise ValueError(f'"{v}" is not a directory.')
+        elif not v.endswith("/"):
+            v += os.path.sep
+
+        return v
 
     @validator("gpu_type")
-    def validate_gpu_type(cls, v):
+    def gpu_type_exists(cls, v):
         """
-        Validates if submitted gpu_type is currently available at Euler
+        Validate if submitted gpu_type is currently available at Euler
         (https://scicomp.ethz.ch/wiki/Getting_started_with_clusters#GPU).
         """
         gpu_list = [
@@ -65,7 +77,7 @@ class JobArrayModel(BaseModel):
     @validator("run_time")
     def validate_and_coerce_run_time(cls, v):
         """
-        Validates if submitted run_time adheres to the format specified in
+        Validate if submitted run_time adheres to the format specified in
         https://scicomp.ethz.ch/wiki/Getting_started_with_clusters#Wall-clock_time.
         """
         if type(v) == str:
@@ -105,22 +117,63 @@ class JobArrayModel(BaseModel):
 
 
 class ConfigModel(BaseModel):
-    data: str
-    runner: str
-    job_array: JobArrayModel
-    hyperparameters: Dict[str, List[Any]]
+    """
+    pydantic BaseModel that handles the job_config.json.
 
-    @validator("data")
-    def data_is_file_or_path(cls, v):
-        if not (os.path.isfile(v) or os.path.isdir(v)):
-            raise ValueError('"data" is not a file/directory.')
-        else:
-            if os.path.isdir(v) and v[-1] != "/":
-                return v + os.path.sep
+    Parameters
+    ----------
+    runner: str
+        Path to the runner file.
+    job_prefix: str
+        Prefix that precedes all results folders and experiment specific files.
+    output_base_dir: str
+        Directory to which all config files and results folders are saved.
+    job_parameters: Dict[str, Any]
+        Dictionary of parameters for the job array command that are handled by the JobArrayModel.
+    runner_parameters: Dict[str, List[Any]]
+        Dictionary containing the parameters grid submitted to the runner.
+    """
+
+    job_prefix: str
+    runner: str
+    output_base_dir: str
+    job_parameters: JobArrayModel
+    runner_parameters: Dict[str, List[Any]]
+
+    @validator("output_base_dir")
+    def output_base_dir_is_dir(cls, v):
+        """
+        Validate if output_base_dir is an existing directory.
+        """
+        if not os.path.isdir(v):
+            raise ValueError(f'"{v}" is not a directory.')
+        elif not v.endswith("/"):
+            v += os.path.sep
+
+        return v
+
+    @validator("runner_parameters")
+    def data_in_runner_parameters_and_file_or_path(cls, v):
+        """
+        Validate if "data" key is in runner_parameters and if it is either file or directory.
+        """
+        # check if runner_parameters contains data key
+        assert "data" in v.keys()
+
+        # check if all paths in "data" are existing files or directories
+        for i, f in enumerate(v["data"]):
+            if not (os.path.isfile(f) or os.path.isdir(f)):
+                raise ValueError(f'"{f}" is not a file/directory.')
+            else:
+                if os.path.isdir(f) and not f.endswith("/"):
+                    v["data"][i] = f + os.path.sep
         return v
 
     @validator("runner")
     def runner_is_file(cls, v):
+        """
+        Validate if "runner" is an existing file.
+        """
         if not os.path.isfile(v):
             raise ValueError('"runner" is not a file.')
         return v
