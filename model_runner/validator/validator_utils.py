@@ -116,7 +116,7 @@ class ConfigModel(BaseModel):
             raise ValueError('"data" is not a file/directory.')
         else:
             if os.path.isdir(v) and v[-1] != "/":
-                return v + "/"
+                return v + os.path.sep
         return v
 
     @validator("runner")

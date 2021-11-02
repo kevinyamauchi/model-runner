@@ -45,26 +45,26 @@ def test_bad_configs(base_config):
     bad_config = base_config.copy()
     bad_config["job_array"]["gpu_type"] = "Titanium"
 
-    with pytest.raises(NameError):
+    with pytest.raises(ValidationError):
         _ = ConfigModel(**bad_config)
 
     # test run_time
     bad_config = base_config.copy()
     bad_config["job_array"]["run_time"] = "3:120"
 
-    with pytest.raises(NameError):
+    with pytest.raises(ValidationError):
         _ = ConfigModel(**bad_config)
 
     # test data
     bad_config = base_config.copy()
     bad_config["data"] = "/some/bad/path"
 
-    with pytest.raises(NameError):
+    with pytest.raises(ValidationError):
         _ = ConfigModel(**bad_config)
 
     # test runner
     bad_config = base_config.copy()
     bad_config["runner"] = "/non/existant/file"
 
-    with pytest.raises(NameError):
+    with pytest.raises(ValidationError):
         _ = ConfigModel(**bad_config)
