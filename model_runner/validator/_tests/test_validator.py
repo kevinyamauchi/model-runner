@@ -47,8 +47,8 @@ def test_good_config(base_config):
         type(config.dict()["job_parameters"]["run_time"]) == int
     ), '"run_time" should be of type int.'
     assert config.dict()["job_parameters"]["logfile_dir"].endswith(
-        "/"
-    ), '"logfile_dir" does not end with "/".'
+        os.path.sep
+    ), f'"logfile_dir" does not end with "{os.path.sep}".'
     assert os.path.isdir(
         config.dict()["output_base_dir"]
     ), '"output_base_dir" is not a directory'

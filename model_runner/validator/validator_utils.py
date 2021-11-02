@@ -44,7 +44,7 @@ class JobArrayModel(BaseModel):
         """
         if not os.path.isdir(v):
             raise ValueError(f'"{v}" is not a directory.')
-        elif not v.endswith("/"):
+        elif not v.endswith(os.path.sep):
             v += os.path.sep
 
         return v
@@ -147,7 +147,7 @@ class ConfigModel(BaseModel):
         """
         if not os.path.isdir(v):
             raise ValueError(f'"{v}" is not a directory.')
-        elif not v.endswith("/"):
+        elif not v.endswith(os.path.sep):
             v += os.path.sep
 
         return v
@@ -165,7 +165,7 @@ class ConfigModel(BaseModel):
             if not (os.path.isfile(f) or os.path.isdir(f)):
                 raise ValueError(f'"{f}" is not a file/directory.')
             else:
-                if os.path.isdir(f) and not f.endswith("/"):
+                if os.path.isdir(f) and not f.endswith(os.path.sep):
                     v["data"][i] = f + os.path.sep
         return v
 
