@@ -1,10 +1,15 @@
 import argparse
 import json
+import os
+from typing import Union
+
+from .utils import write_runner_params
 
 
-def _validation_func(params):
-    with open(params) as f:
-        validated_parameters = json.load(f)
+def _validation_func(params_path: Union[str, os.PathLike]):
+    with open(params_path, "r") as f:
+        parameters = json.load(f)
+    validated_parameters = parameters
     return validated_parameters
 
 
@@ -18,4 +23,13 @@ def _parse_args():
 
 def main():
     args = _parse_args()
-    print(args)
+    validated_parameters = _validation_func(args.params)
+
+    runner_params_fname = f"{validated_parameters.job_prefix}_runner_parameters.json"
+    runner_params_path = os.path.join(
+        validated_parameters.output_base_dir, runner_params_fname
+    )
+
+    write_runner_params(
+        params=validated_parameters.dict(), output_path=runner_params_path
+    )

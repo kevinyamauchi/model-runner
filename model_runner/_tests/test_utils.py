@@ -4,7 +4,7 @@ import os
 from model_runner.utils import (
     _create_job_array_params,
     _create_job_param,
-    write_job_array_params,
+    write_runner_params,
 )
 
 
@@ -51,7 +51,7 @@ def test_write_job_array_params(tmpdir):
         "augment": [True, False],
     }
 
-    write_job_array_params(params, output_path)
+    write_runner_params(params, output_path)
 
     with open(output_path, "r") as f_json:
         job_array_params = json.load(f_json)

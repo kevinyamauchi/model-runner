@@ -1,7 +1,7 @@
 import json
 import os
 from itertools import product
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 
 def _create_job_param(
@@ -25,8 +25,10 @@ def _create_job_array_params(params: Dict[str, List[Any]]) -> Dict[int, Dict[str
     return job_array_params
 
 
-def write_job_array_params(params: Dict[str, List[Any]], output_path: os.PathLike):
-    """Write the parameters file for the job array to disk
+def write_runner_params(
+    params: Dict[str, List[Any]], output_path: Union[str, os.PathLike]
+):
+    """Write the parameters file for the job array runners to disk
 
     Parameters
     ----------
