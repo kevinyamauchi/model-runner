@@ -1,14 +1,14 @@
 import argparse
 import json
-import subprocess
+import os
 
 from .dispatcher_utils import create_run_command
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("job_id", help="the job ID from /$LSB_JOBINDEX", type=int)
-    parser.add_argument("params", help="path to the job params file", type=str)
+    parser.add_argument("--job_id", help="the job ID from /$LSB_JOBINDEX", type=int)
+    parser.add_argument("--params", help="path to the job params file", type=str)
     args = parser.parse_args()
 
     job_id = args.job_id
@@ -19,4 +19,4 @@ def main():
     # json number keys are saved as strings
     job_params = params[str(job_id)]
     run_command = create_run_command(job_params)
-    subprocess.run(run_command)
+    os.system(run_command)
