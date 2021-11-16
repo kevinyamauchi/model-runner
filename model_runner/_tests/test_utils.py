@@ -135,20 +135,15 @@ def test_write_runner_params(tmp_path_factory):
     assert {"1", "2", "3", "4", "5", "6"} == set(runner_params.keys())
 
 
-def test_write_job_array(tmp_path):
+def test_write_job_array(tmp_path, base_config):
     job_prefix = "test_"
     njobs_parallel = 4
     runner_params_path = os.path.join(tmp_path, "test.json")
 
-    params = {
-        "runner": ["hello.py"],
-        "batch_size": [0, 10, 20],
-        "augment": [True, False],
-    }
-
-    _write_runner_params(params, runner_params_path)
+    config_model = ConfigModel(**base_config)
+    _write_runner_params(config_model, runner_params_path)
 
     job_array_command = _write_job_array(runner_params_path, job_prefix, njobs_parallel)
-    expected_command = f'bsub -J "test_[1-6]%4 model_dispatcher --job_id \\$LSB_JOBINDEX --params {runner_params_path}"'
+    expected_command = f'bsub -J "test_[1-12]%4 model_dispatcher --job_id \\$LSB_JOBINDEX --params {runner_params_path}"'
 
     assert expected_command == job_array_command
