@@ -6,35 +6,65 @@ from model_runner.utils import (
     _create_job_param,
     write_runner_params,
 )
+from model_runner.validator import ConfigModel
 
 
 def test_create_job_param():
-    param_names = ["runner", "batch_size", "learning_rate"]
-    param_values = ["hello.py", 10, 1]
-    params = _create_job_param(param_names, param_values)
+    param_names = ["batch_size", "learning_rate"]
+    param_values = [10, 1]
+    job_prefix = "test_job"
+    runner = "runner.py"
+    job_index = 1
+    output_base_dir = "./output"
+    params = _create_job_param(
+        param_names,
+        param_values,
+        job_prefix=job_prefix,
+        runner=runner,
+        output_base_dir=output_base_dir,
+        job_index=job_index,
+    )
 
-    expected_params = {"runner": "hello.py", "batch_size": 10, "learning_rate": 1}
+    expected_params = {
+        "runner": runner,
+        "job_prefix": job_prefix,
+        "job_index": job_index,
+        "output_base_dir": output_base_dir,
+        "batch_size": 10,
+        "learning_rate": 1,
+    }
     assert params == expected_params
 
 
 def test_create_job_array_params():
     params = {
-        "runner": ["hello.py"],
         "batch_size": [0, 10, 20],
         "augment": [True, False],
     }
-    job_array_params = _create_job_array_params(params)
+    job_prefix = "test_job"
+    runner = "runner.py"
+    output_base_dir = "./output"
+    job_array_params = _create_job_array_params(
+        params, job_prefix=job_prefix, runner=runner, output_base_dir=output_base_dir
+    )
     job_array_param_combinations = [
-        (v["runner"], v["batch_size"], v["augment"]) for v in job_array_params.values()
+        (
+            v["runner"],
+            v["job_prefix"],
+            v["output_base_dir"],
+            v["batch_size"],
+            v["augment"],
+        )
+        for v in job_array_params.values()
     ]
 
     expected_params = [
-        ("hello.py", 0, True),
-        ("hello.py", 0, False),
-        ("hello.py", 10, True),
-        ("hello.py", 10, False),
-        ("hello.py", 20, True),
-        ("hello.py", 20, False),
+        (runner, job_prefix, output_base_dir, 0, True),
+        (runner, job_prefix, output_base_dir, 0, False),
+        (runner, job_prefix, output_base_dir, 10, True),
+        (runner, job_prefix, output_base_dir, 10, False),
+        (runner, job_prefix, output_base_dir, 20, True),
+        (runner, job_prefix, output_base_dir, 20, False),
     ]
 
     assert len(job_array_params) == 6
@@ -42,30 +72,60 @@ def test_create_job_array_params():
     assert {1, 2, 3, 4, 5, 6} == set(job_array_params.keys())
 
 
-def test_write_job_array_params(tmpdir):
-    output_path = os.path.join(tmpdir, "test.json")
-
+def test_write_job_array_params(tmp_path_factory):
+    job_prefix = "test_job"
+    runner = tmp_path_factory.mktemp("data") / "myfile"
+    runner.touch()
+    runner_path = runner.as_posix()
+    output_base_dir = tmp_path_factory._basetemp.as_posix()
     params = {
-        "runner": ["hello.py"],
+        "data": [tmp_path_factory._basetemp.as_posix()],
         "batch_size": [0, 10, 20],
         "augment": [True, False],
     }
+    config = {
+        "runner": runner_path,
+        "output_base_dir": output_base_dir,
+        "job_prefix": job_prefix,
+        "runner_parameters": params,
+        "job_parameters": {
+            "gpu_type": "TITANRTX",
+            "logfile_dir": tmp_path_factory._basetemp.as_posix(),
+            "memory": 4000,
+            "ngpus": 2,
+            "njobs_parallel": 4,
+            "processor_cores": 16,
+            "run_time": "3:00",
+            "scratch": 4000,
+        },
+    }
+    config_model = ConfigModel(**config)
 
-    write_runner_params(params, output_path)
+    output_path = os.path.join(tmp_path_factory._basetemp.as_posix(), "test.json")
+    write_runner_params(config_model, output_path)
 
     with open(output_path, "r") as f_json:
         job_array_params = json.load(f_json)
     job_array_param_combinations = [
-        (v["runner"], v["batch_size"], v["augment"]) for v in job_array_params.values()
+        (
+            v["runner"],
+            v["job_prefix"],
+            v["output_base_dir"],
+            v["batch_size"],
+            v["augment"],
+        )
+        for v in job_array_params.values()
     ]
+    # we expect the path sep to be added to the end of the base dir path
+    validated_output_base_dir = output_base_dir + os.path.sep
 
     expected_params = [
-        ("hello.py", 0, True),
-        ("hello.py", 0, False),
-        ("hello.py", 10, True),
-        ("hello.py", 10, False),
-        ("hello.py", 20, True),
-        ("hello.py", 20, False),
+        (runner_path, job_prefix, validated_output_base_dir, 0, True),
+        (runner_path, job_prefix, validated_output_base_dir, 0, False),
+        (runner_path, job_prefix, validated_output_base_dir, 10, True),
+        (runner_path, job_prefix, validated_output_base_dir, 10, False),
+        (runner_path, job_prefix, validated_output_base_dir, 20, True),
+        (runner_path, job_prefix, validated_output_base_dir, 20, False),
     ]
 
     assert len(job_array_params) == 6

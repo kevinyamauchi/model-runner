@@ -32,7 +32,7 @@ def main():
         validated_parameters.output_base_dir, runner_params_fname
     )
     write_runner_params(
-        params=validated_parameters.dict(), output_path=runner_params_path
+        array_config=validated_parameters.dict(), output_path=runner_params_path
     )
 
     # build the submission command from parameters

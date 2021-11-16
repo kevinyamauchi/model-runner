@@ -16,6 +16,7 @@ def main():
     with open(args.params) as f_params:
         params = json.load(f_params)
 
-    job_params = params[job_id]
+    # json number keys are saved as strings
+    job_params = params[str(job_id)]
     run_command = create_run_command(job_params)
     subprocess.run(run_command)
