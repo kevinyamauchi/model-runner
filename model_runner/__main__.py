@@ -22,9 +22,7 @@ def main():
     runner_params_path = os.path.join(
         validated_parameters.output_base_dir, runner_params_fname
     )
-    _write_runner_params(
-        params=validated_parameters, output_path=runner_params_path
-    )
+    _write_runner_params(params=validated_parameters, output_path=runner_params_path)
 
     # build the submission command from parameters
     job_prefix = validated_parameters["job_prefix"]

@@ -10,7 +10,6 @@ from model_runner.utils import (
 from model_runner.validator import ConfigModel
 
 
-
 def test_create_runner_param():
     param_names = ["batch_size", "learning_rate"]
     param_values = [10, 1]
@@ -46,7 +45,7 @@ def test_create_runner_params():
     job_prefix = "test_job"
     runner = "runner.py"
     output_base_dir = "./output"
-    job_array_params = _create_runner_params(
+    runner_params = _create_runner_params(
         params, job_prefix=job_prefix, runner=runner, output_base_dir=output_base_dir
     )
     runner_param_combinations = [
@@ -57,7 +56,7 @@ def test_create_runner_params():
             v["batch_size"],
             v["augment"],
         )
-        for v in job_array_params.values()
+        for v in runner_params.values()
     ]
 
     expected_params = [
