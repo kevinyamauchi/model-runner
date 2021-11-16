@@ -82,31 +82,52 @@ def _write_runner_params(
         json.dump(runner_params, f_out, indent=4, sort_keys=True)
 
 
-def _write_job_array(runner_params_path: str, job_prefix: str, njobs_parallel: str):
+def _write_job_array(array_config: ConfigModel, runner_params_path: str) -> str:
     """
     Write job array command as defined in https://github.com/kevinyamauchi/model-runner/issues/7.
 
     Parameters
     ----------
 
+    array_config : ConfigModel
+        The parameters for the job array. The dictionary should have
+        string keys, each being a parameter name. The values should be
+        a list of values. The resulting job array will have jobs that are
+        the combinations of all of the parameters.
+
     runner_params_path: str
         Path to runner dictionary.
-
-    job_prefix: str
-        Prefix added to every job file.
-
-    njobs_parallel: int
-        Number of jobs that are submitted in parallel.
 
     Return
     ------
     Job array str formated as in https://github.com/kevinyamauchi/model-runner/issues/7.
     """
+    job_prefix = array_config.job_prefix
+    gpu_type = array_config.job_parameters.gpu_type
+    logfile_dir = os.path.join(array_config.job_parameters.logfile_dir, job_prefix)
+    memory = array_config.job_parameters.memory
+    ngpus = array_config.job_parameters.ngpus
+    njobs_parallel = array_config.job_parameters.njobs_parallel
+    processor_cores = array_config.job_parameters.processor_cores
+    run_time = array_config.job_parameters.run_time
+    scratch = array_config.job_parameters.scratch
+
     with open(runner_params_path, "r") as f:
         runner_params = json.load(f)
 
-    max_key = len(runner_params)
+    n_ids = len(runner_params)
 
-    job_array_command = f'bsub -J "{job_prefix}[1-{max_key}]%{njobs_parallel} model_dispatcher --job_id \\$LSB_JOBINDEX --params {runner_params_path}"'
+    # write command str
+    job_array_command = f'bsub -J "{job_prefix}[1-{n_ids}]%{njobs_parallel}"'
+    job_array_command += f' -o "{logfile_dir}%I"'
+    job_array_command += f' -W "{run_time}"'
+    job_array_command += f' -n "{processor_cores}"'
+    job_array_command += (
+        f' -R "rusage[scratch={scratch}, mem={memory}, ngpus_excl_p={ngpus}]"'
+    )
+    job_array_command += f' -R "select[gpu_model0=={gpu_type}]"'
+    job_array_command += (
+        f' "model_dispatcher --job_id \\$LSB_JOBINDEX --params {runner_params_path}"'
+    )
 
     return job_array_command
