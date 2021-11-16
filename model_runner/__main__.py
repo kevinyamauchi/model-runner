@@ -1,17 +1,8 @@
 import argparse
-import json
 import os
-from typing import Union
 
-from .utils import write_runner_params
-from .validator import ConfigModel
-
-
-def _validation_func(params_path: Union[str, os.PathLike]) -> ConfigModel:
-    with open(params_path, "r") as f:
-        parameters = json.load(f)
-    validated_parameters = ConfigModel(**parameters)
-    return validated_parameters
+from .utils import write_job_array, write_runner_params
+from .validator import _validation_func
 
 
 def _parse_args():
@@ -32,9 +23,13 @@ def main():
         validated_parameters.output_base_dir, runner_params_fname
     )
     write_runner_params(
-        params=validated_parameters.dict(), output_path=runner_params_path
+        params=validated_parameters.runner_params.dict(), output_path=runner_params_path
     )
 
     # build the submission command from parameters
+    job_prefix = validated_parameters["job_prefix"]
+    njobs_parallel = validated_parameters["job_parameters"]["njobs_parallel"]
+    job_array_command = write_job_array(runner_params_path, job_prefix, njobs_parallel)
 
     # submit the job
+    os.system(job_array_command)
