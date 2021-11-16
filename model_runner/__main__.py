@@ -16,7 +16,7 @@ def _validation_func(params_path: Union[str, os.PathLike]) -> ConfigModel:
 
 def _parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("params", help="path to the job params file", type=str)
+    parser.add_argument("--params", help="path to the job params file", type=str)
     args = parser.parse_args()
 
     return args
