@@ -7,7 +7,7 @@ from .validator import _validation_func
 
 def _parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("params", help="path to the job params file", type=str)
+    parser.add_argument("--params", help="path to the job params file", type=str)
     args = parser.parse_args()
 
     return args
