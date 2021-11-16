@@ -1,6 +1,6 @@
 import argparse
 import json
-import subprocess
+import os
 
 from .dispatcher_utils import create_run_command
 
@@ -18,4 +18,4 @@ def main():
 
     job_params = params[job_id]
     run_command = create_run_command(job_params)
-    subprocess.run(run_command)
+    os.system(run_command)

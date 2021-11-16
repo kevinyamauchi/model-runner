@@ -1,6 +1,5 @@
 import json
 import os
-import subprocess
 
 
 file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -36,4 +35,4 @@ with open(config_path, 'r') as f:
 
 # run
 run_command = f'model_runner --params {config_path}'
-subprocess.run(run_command)
+os.system(run_command)
