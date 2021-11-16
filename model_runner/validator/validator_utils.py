@@ -1,3 +1,4 @@
+import json
 import os
 from typing import Any, Dict, List, Union
 
@@ -177,3 +178,10 @@ class ConfigModel(BaseModel):
         if not os.path.isfile(v):
             raise ValueError('"runner" is not a file.')
         return v
+
+
+def _validation_func(params_path: Union[str, os.PathLike]) -> ConfigModel:
+    with open(params_path, "r") as f:
+        parameters = json.load(f)
+    validated_parameters = ConfigModel(**parameters)
+    return validated_parameters
