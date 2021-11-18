@@ -103,14 +103,14 @@ def _write_job_array(array_config: ConfigModel, runner_params_path: str) -> str:
     Job array str formated as in https://github.com/kevinyamauchi/model-runner/issues/7.
     """
     job_prefix = array_config.job_prefix
-    gpu_type = array_config.job_parameters.gpu_type
     logfile_dir = os.path.join(array_config.job_parameters.logfile_dir, job_prefix)
     memory = array_config.job_parameters.memory
-    ngpus = array_config.job_parameters.ngpus
     njobs_parallel = array_config.job_parameters.njobs_parallel
     processor_cores = array_config.job_parameters.processor_cores
     run_time = array_config.job_parameters.run_time
     scratch = array_config.job_parameters.scratch
+    ngpus = array_config.job_parameters.ngpus
+    gpu_type = array_config.job_parameters.gpu_type
 
     with open(runner_params_path, "r") as f:
         runner_params = json.load(f)
@@ -122,10 +122,17 @@ def _write_job_array(array_config: ConfigModel, runner_params_path: str) -> str:
     job_array_command += f' -o "{logfile_dir}%I"'
     job_array_command += f' -W "{run_time}"'
     job_array_command += f' -n "{processor_cores}"'
-    job_array_command += (
-        f' -R "rusage[scratch={scratch}, mem={memory}, ngpus_excl_p={ngpus}]"'
-    )
-    job_array_command += f' -R "select[gpu_model0=={gpu_type}]"'
+
+    if ngpus is None:
+        job_array_command += f' -R "rusage[scratch={scratch}, mem={memory}]"'
+    else:
+        job_array_command += (
+            f' -R "rusage[scratch={scratch}, mem={memory}, ngpus_excl_p={ngpus}]"'
+        )
+
+    if gpu_type is not None:
+        job_array_command += f' -R "select[gpu_model0=={gpu_type}]"'
+
     job_array_command += (
         f' "model_dispatcher --job_id \\$LSB_JOBINDEX --params {runner_params_path}"'
     )

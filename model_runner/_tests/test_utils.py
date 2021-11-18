@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 
@@ -141,6 +142,7 @@ def test_write_job_array(tmp_path_factory, base_config):
     )
     logfile_dir = os.path.join(tmp_path_factory._basetemp.as_posix(), "my_experiment")
 
+    # test gpu config
     config_model = ConfigModel(**base_config)
     _write_runner_params(config_model, runner_params_path)
 
@@ -151,6 +153,25 @@ def test_write_job_array(tmp_path_factory, base_config):
     expected_command += ' -n "16"'
     expected_command += ' -R "rusage[scratch=4000, mem=4000, ngpus_excl_p=2]"'
     expected_command += ' -R "select[gpu_model0==TITANRTX]"'
+    expected_command += (
+        f' "model_dispatcher --job_id \\$LSB_JOBINDEX --params {runner_params_path}"'
+    )
+
+    assert expected_command == job_array_command
+
+    # test cpu config
+    cpu_config = copy.deepcopy(base_config)
+    cpu_config["job_parameters"].pop("ngpus")
+    cpu_config["job_parameters"].pop("gpu_type")
+    config_model = ConfigModel(**cpu_config)
+    _write_runner_params(config_model, runner_params_path)
+
+    job_array_command = _write_job_array(config_model, runner_params_path)
+    expected_command = 'bsub -J "my_experiment[1-12]%4"'
+    expected_command += f' -o "{logfile_dir}%I"'
+    expected_command += ' -W "180"'
+    expected_command += ' -n "16"'
+    expected_command += ' -R "rusage[scratch=4000, mem=4000]"'
     expected_command += (
         f' "model_dispatcher --job_id \\$LSB_JOBINDEX --params {runner_params_path}"'
     )

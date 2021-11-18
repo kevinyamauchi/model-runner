@@ -1,3 +1,4 @@
+import copy
 import os
 
 import pytest
@@ -7,6 +8,7 @@ from model_runner.validator.validator_utils import ConfigModel
 
 
 def test_good_config(base_config):
+    # test gpu config
     config = ConfigModel(**base_config)
 
     # test some specific parameters
@@ -23,18 +25,38 @@ def test_good_config(base_config):
         config.dict()["output_base_dir"]
     ), '"output_base_dir" is not a directory'
 
+    # test cpu config
+    cpu_config = copy.deepcopy(base_config)
+    cpu_config["job_parameters"].pop("gpu_type")
+    cpu_config["job_parameters"].pop("ngpus")
+
+    config = ConfigModel(**cpu_config)
+
+    # test some specific parameters of cpu config
+    assert (
+        config.dict()["job_parameters"]["gpu_type"] is None
+    ), '"gpu_type" should be None.'
+    assert config.dict()["job_parameters"]["ngpus"] is None, '"ngpus" should be None.'
+
 
 def test_bad_configs(base_config):
     # test gpu_type
-    bad_config = base_config.copy()
+    bad_config = copy.deepcopy(base_config)
     bad_config["job_parameters"].pop("gpu_type")
     bad_config["job_parameters"]["gpu_type"] = "Titanium"
 
     with pytest.raises(ValidationError):
         _ = ConfigModel(**bad_config)
 
+    # test omitting gpu_type and ngpus
+    bad_config = copy.deepcopy(base_config)
+    bad_config["job_parameters"].pop("ngpus")
+
+    with pytest.raises(ValidationError):
+        _ = ConfigModel(**bad_config)
+
     # test run_time
-    bad_config = base_config.copy()
+    bad_config = copy.deepcopy(base_config)
     bad_config["job_parameters"].pop("run_time")
     bad_config["job_parameters"]["run_time"] = "3:120"
 
@@ -42,7 +64,7 @@ def test_bad_configs(base_config):
         _ = ConfigModel(**bad_config)
 
     # test data
-    bad_config = base_config.copy()
+    bad_config = copy.deepcopy(base_config)
     bad_config["runner_parameters"].pop("data")
 
     with pytest.raises(ValidationError):
@@ -54,7 +76,7 @@ def test_bad_configs(base_config):
         _ = ConfigModel(**bad_config)
 
     # test runner
-    bad_config = base_config.copy()
+    bad_config = copy.deepcopy(base_config)
     bad_config.pop("runner")
     bad_config["runner"] = "/non/existant/file"
 
