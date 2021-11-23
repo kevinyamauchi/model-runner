@@ -22,10 +22,14 @@ def main():
     runner_params_path = os.path.join(
         validated_parameters.output_base_dir, runner_params_fname
     )
-    _write_runner_params(params=validated_parameters, output_path=runner_params_path)
+    _write_runner_params(
+        array_config=validated_parameters, output_path=runner_params_path
+    )
 
     # build the submission command from parameters
-    job_array_command = _write_job_array(runner_params_path, validated_parameters)
+    job_array_command = _write_job_array(
+        array_config=validated_parameters, runner_params_path=runner_params_path
+    )
 
     # submit the job
     os.system(job_array_command)
