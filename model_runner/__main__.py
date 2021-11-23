@@ -25,9 +25,7 @@ def main():
     _write_runner_params(params=validated_parameters, output_path=runner_params_path)
 
     # build the submission command from parameters
-    job_prefix = validated_parameters["job_prefix"]
-    njobs_parallel = validated_parameters["job_parameters"]["njobs_parallel"]
-    job_array_command = _write_job_array(runner_params_path, job_prefix, njobs_parallel)
+    job_array_command = _write_job_array(runner_params_path, validated_parameters)
 
     # submit the job
     os.system(job_array_command)

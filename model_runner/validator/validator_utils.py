@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, validator
 
@@ -33,10 +33,10 @@ class JobArrayModel(BaseModel):
     processor_cores: int
     memory: int
     scratch: int
-    gpu_type: str
-    ngpus: int
     njobs_parallel: int
     logfile_dir: str
+    gpu_type: Optional[str] = None
+    ngpus: Optional[int] = None
 
     @validator("logfile_dir")
     def logfile_dir_is_dir(cls, v):
@@ -47,6 +47,16 @@ class JobArrayModel(BaseModel):
             raise ValueError(f'"{v}" is not a directory.')
         elif not v.endswith(os.path.sep):
             v += os.path.sep
+
+        return v
+
+    @validator("ngpus", always=True)
+    def ngpus_and_gpu_type_match(cls, v, values):
+        if (None in (v, values.get("gpu_type"))) and (v != values.get("gpu_type")):
+            gpu_type = values.get("gpu_type")
+            raise ValueError(
+                f'gpu_type and ngpus either both have to be declared or omitted, but type(gpu_type) is "{type(gpu_type)}" and type(ngpus) is "{type(v)}".'
+            )
 
         return v
 
