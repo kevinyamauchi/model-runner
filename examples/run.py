@@ -30,7 +30,7 @@ config = {
 
 # write the config
 config_path = os.path.join(file_dir, 'config.json')
-with open(config_path, 'r') as f:
+with open(config_path, 'w') as f:
     json.dump(config, f)
 
 # run

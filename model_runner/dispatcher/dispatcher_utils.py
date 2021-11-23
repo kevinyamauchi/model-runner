@@ -24,7 +24,7 @@ def create_run_command(params: Dict[str, Any]) -> str:
     except AssertionError:
         raise TypeError("runner should be a string")
 
-    job_command = runner
+    job_command = f"python {runner}"
 
     for k, v in params.items():
         job_command += f" --{k} {v}"
