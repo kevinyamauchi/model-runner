@@ -49,7 +49,7 @@ model-runner was tested on ETH Zurich's EULER cluster (`IBM Spectrum LSF Standar
     conda activate model-runner
     ```
 
-2) Write your `.json` config file following the [config template](). Our example config `my_config.json` contains the following parameters
+2) Write your `.json` config file following the [config example](./examples/config_example.json). Our example config `config_example.json` contains the following parameters
 
     1) `job_parameters`: Dictionary containing the 
         1) (optional)`gpu_type`: Type of GPU that is accepted by bsub -R "select[gpu_model0=={gpu_type}]". See
@@ -79,7 +79,7 @@ model-runner was tested on ETH Zurich's EULER cluster (`IBM Spectrum LSF Standar
         1) `data`: a list of paths to your data set file or directory (whatever your `runner` accepts as input
         data). **Note:** `runner` has to accept input data via `{runner} --data {data-path}`.
 
-        2) `{parameter_placeholder1}`: You can submit as many parameters as your `runner` accepts input arguments (besides `data`). You just have to make sure that `{parameter_placeholder1}` matches an input argument of `runner` and the values of `{parameter_placeholder1}` are wrapped in a list. Checkout the [config template]() for an illustrative example.
+        2) `{parameter_placeholder1}`: You can submit as many parameters as your `runner` accepts input arguments (besides `data`). You just have to make sure that `{parameter_placeholder1}` matches an input argument of `runner` and the values of `{parameter_placeholder1}` are wrapped in a list. Checkout the [config example](./examples/config_example.json) for an illustrative example.
 
 3) Submit the hyper-parameter optimization
 
