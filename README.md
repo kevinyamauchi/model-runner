@@ -1,5 +1,5 @@
 # model-runner
-**mode-runner** is a Python-based CLI to submit hyper-parameter optimization (i.e. grid-search) jobs to the [LSF batch system](https://www.bsc.es/support/LSF/old-9.1.1/lsf_programmer/index.htm?batch_programmer_lsf.html~main). model-runner requires a `.json` config as input and validates the content of the config to prevent common errors such as non-existent files or incorrectly formatted LSF batch submissions parameters.
+**model-runner** is a Python-based CLI to submit hyper-parameter optimization (i.e. grid-search) jobs to the [LSF batch system](https://www.bsc.es/support/LSF/old-9.1.1/lsf_programmer/index.htm?batch_programmer_lsf.html~main). model-runner requires a `.json` config as input and validates the content of the config to prevent common errors such as non-existent files or incorrectly formatted LSF batch submissions parameters.
 
 ## Installation
 model-runner was tested on ETH Zurich's EULER cluster (`IBM Spectrum LSF Standard 10.1.0.7`) and may not work on other clusters or lsf versions.
