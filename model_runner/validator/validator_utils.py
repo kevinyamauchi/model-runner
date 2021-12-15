@@ -70,9 +70,8 @@ class JobArrayModel(BaseModel):
             "GeForceGTX1080",
             "GeForceGTX1080Ti",
             "GeForceRTX2080Ti",
-            "GeForceRTX2080Ti",
-            "TITANRTX",
-            "TeslaV100_SXM2_32GB",
+            "NVIDIAGeForceRTX2080Ti",
+            "NVIDIATITANRTX",
             "TeslaV100_SXM2_32GB",
             "A100_PCIE_40GB",
         ]

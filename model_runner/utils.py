@@ -133,6 +133,14 @@ def _write_job_array(array_config: ConfigModel, runner_params_path: str) -> str:
     if gpu_type is not None:
         job_array_command += f' -R "select[gpu_model0=={gpu_type}]"'
 
+        # currently specifiers for RTX2080Ti specifiers vary depending on the GPU driver version. Furthermore,
+        # both old an new GPU drivers are currently installed on euler
+        # (see https://scicomp.ethz.ch/wiki/Change_of_GPU_specifiers_in_the_batch_system).
+        if gpu_type == "NVIDIAGeForceRTX2080Ti":
+            job_array_command += ' -R "select[gpu_driver>460]"'
+        elif gpu_type == "GeForceRTX2080Ti":
+            job_array_command += ' -R "select[gpu_driver<460]"'
+
     job_array_command += (
         f' "model_dispatcher --job_id \\$LSB_JOBINDEX --params {runner_params_path}"'
     )
