@@ -1,6 +1,6 @@
 {
     "job_parameters": {
-        "gpu_type": "TITANRTX",
+        "gpu_type": "NVIDIATITANRTX",
         "logfile_dir": "/path/to/logdir/",
         "memory": 4000,
         "ngpus": 2,
