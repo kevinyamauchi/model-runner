@@ -72,7 +72,8 @@ training routine (i.e. `runner`) are installed.
 
     2) `job_prefix`: Prefix that precedes all results folders and experiment specific files.
 
-    3) `output_base_dir`: Directory to which all config files and results folders are saved.
+    3) `output_base_dir`: Directory to which all config files and results folders are saved. # TODO: adapt
+    explanation of relevance to runner
 
     4) `runner`: Path to the file that trains your model.
 
