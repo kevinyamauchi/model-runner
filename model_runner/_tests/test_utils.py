@@ -92,7 +92,7 @@ def test_write_runner_params(tmp_path_factory):
         "job_prefix": job_prefix,
         "runner_parameters": params,
         "job_parameters": {
-            "gpu_type": "TITANRTX",
+            "gpu_type": "NVIDIATITANRTX",
             "logfile_dir": tmp_path_factory._basetemp.as_posix(),
             "memory": 4000,
             "ngpus": 2,
@@ -152,7 +152,7 @@ def test_write_job_array(tmp_path_factory, base_config):
     expected_command += ' -W "180"'
     expected_command += ' -n "16"'
     expected_command += ' -R "rusage[scratch=4000, mem=4000, ngpus_excl_p=2]"'
-    expected_command += ' -R "select[gpu_model0==TITANRTX]"'
+    expected_command += ' -R "select[gpu_model0==NVIDIATITANRTX]"'
     expected_command += (
         f' "model_dispatcher --job_id \\$LSB_JOBINDEX --params {runner_params_path}"'
     )
