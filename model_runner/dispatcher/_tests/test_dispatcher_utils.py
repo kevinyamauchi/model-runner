@@ -9,12 +9,12 @@ def test_create_run_command():
         "data": "path_to_data",
         "batch_size": 1,
         "learning_rate": 0.01,
+        "augment": True,
+        "preprocess": False,
     }
     run_command = create_run_command(params)
 
-    expected_command = (
-        "python test.py --data path_to_data --batch_size 1 --learning_rate 0.01"
-    )
+    expected_command = "python test.py --data path_to_data --batch_size 1 --learning_rate 0.01 --augment"
     assert run_command == expected_command
 
 

@@ -27,6 +27,12 @@ def create_run_command(params: Dict[str, Any]) -> str:
     job_command = f"python {runner}"
 
     for k, v in params.items():
-        job_command += f" --{k} {v}"
+        if type(v) == bool:
+            if v is True:
+                job_command += f" --{k}"
+            else:
+                pass
+        else:
+            job_command += f" --{k} {v}"
 
     return job_command

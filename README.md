@@ -22,7 +22,8 @@ model-runner was tested on ETH Zurich's EULER cluster (`IBM Spectrum LSF Standar
     conda create -n model-runner python=3.8
     ```
 
-4) Activate your virtual environment, after your it has been created.
+4) Activate your virtual environment, after it has been created. NOTE: Make sure the dependencies for your
+training routine (i.e. `runner`) are installed.
 
     ```bash
     conda activate model-runner
@@ -79,7 +80,10 @@ model-runner was tested on ETH Zurich's EULER cluster (`IBM Spectrum LSF Standar
         1) `data`: a list of paths to your data set file or directory (whatever your `runner` accepts as input
         data). **Note:** `runner` has to accept input data via `{runner} --data {data-path}`.
 
-        2) `{parameter_placeholder1}`: You can submit as many parameters as your `runner` accepts input arguments (besides `data`). You just have to make sure that `{parameter_placeholder1}` matches an input argument of `runner` and the values of `{parameter_placeholder1}` are wrapped in a list. Checkout the [config example](./examples/config_example.json) for an illustrative example.
+        2) `{parameter_placeholder}`: You can submit as many parameters as your `runner` accepts input arguments (besides `data`). You just have to make sure that `{parameter_placeholder}` matches an input argument of `runner` and the values of `{parameter_placeholder}` are wrapped in a list. Checkout the [config example](./examples/config_example.json) for an illustrative example.
+          1) If the `type()` of the `parameter_placeholder` value is `bool` (see `augment` key in example
+          config) `True` corresponds to adding the `--parameter_placeholder` flag (i.e. `python my_runner.py --parameter_placeholder`). `False` corresponds to
+          omitting the flag from the `runner` call (i.e. `python my_runner.py`). NOTE: Beware of inverted logic if parser argument uses `action=store_false`.
 
 3) Submit the hyper-parameter optimization
 
