@@ -70,10 +70,12 @@ training routine (i.e. `runner`) are installed.
 
         8) `scratch`: Amount of local scratch requested per processor core. Corresponds to `bsub -R "rusage[scratch={scratch}]"`.
 
-    2) `job_prefix`: Prefix that precedes all results folders and experiment specific files.
+    2) `job_prefix`: Prefix that precedes all results folders and experiment specific files. Will be appended to
+    `output_base_dir` to create subfolders `job_prefix{ID}` in `output_base_dir` containing all results of run
+    {ID}.
 
-    3) `output_base_dir`: Directory to which all config files and results folders are saved. # TODO: adapt
-    explanation of relevance to runner
+    3) `output_base_dir`: Directory to which all config files and results folders are saved. `output_base_dir`
+    must be an input argument to the runner and should not be repeated in the `runner_parameters`.
 
     4) `runner`: Path to the file that trains your model.
 
@@ -81,7 +83,7 @@ training routine (i.e. `runner`) are installed.
         1) `data`: a list of paths to your data set file or directory (whatever your `runner` accepts as input
         data). **Note:** `runner` has to accept input data via `{runner} --data {data-path}`.
 
-        2) `{parameter_placeholder}`: You can submit as many parameters as your `runner` accepts input arguments (besides `data`). You just have to make sure that `{parameter_placeholder}` matches an input argument of `runner` and the values of `{parameter_placeholder}` are wrapped in a list. Checkout the [config example](./examples/config_example.json) for an illustrative example.
+        2) `{parameter_placeholder}`: You can submit as many parameters as your `runner` accepts input arguments (besides `data`, `output_base_dir`). You just have to make sure that `{parameter_placeholder}` matches an input argument of `runner` and the values of `{parameter_placeholder}` are wrapped in a list. Checkout the [config example](./examples/config_example.json) for an illustrative example.
           1) If the `type()` of the `parameter_placeholder` value is `bool` (see `augment` key in example
           config) `True` corresponds to adding the `--parameter_placeholder` flag (i.e. `python my_runner.py --parameter_placeholder`). `False` corresponds to
           omitting the flag from the `runner` call (i.e. `python my_runner.py`). NOTE: Beware of inverted logic if parser argument uses `action=store_false`.
