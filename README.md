@@ -79,14 +79,19 @@ training routine (i.e. `runner`) are installed.
 
     4) `runner`: Path to the file that trains your model.
 
-    5) `runner_parameters`: Dictionary containing the parameters grid submitted to the runner.
+    5) `runner_parameters`: Dictionary containing the parameters grid submitted to the runner. All values of the
+    dictionary are of type `list()`, including `data` and `output_base_dir`.
         1) `data`: a list of paths to your data set file or directory (whatever your `runner` accepts as input
         data). **Note:** `runner` has to accept input data via `{runner} --data {data-path}`.
 
-        2) `{parameter_placeholder}`: You can submit as many parameters as your `runner` accepts input arguments (besides `data`, `output_base_dir`). You just have to make sure that `{parameter_placeholder}` matches an input argument of `runner` and the values of `{parameter_placeholder}` are wrapped in a list. Checkout the [config example](./examples/config_example.json) for an illustrative example.
-          1) If the `type()` of the `parameter_placeholder` value is `bool` (see `augment` key in example
-          config) `True` corresponds to adding the `--parameter_placeholder` flag (i.e. `python my_runner.py --parameter_placeholder`). `False` corresponds to
-          omitting the flag from the `runner` call (i.e. `python my_runner.py`). NOTE: Beware of inverted logic if parser argument uses `action=store_false`.
+        2) `output_base_dir`: a list of paths to which the results of `runner` are saved. **Note** `runner` has
+        to accept the output folder via `{runner} --output_base_dir {output_path}`.
+
+        3) `{parameter_placeholder}`: You can submit as many parameters as your `runner` accepts input arguments (besides `data`, `output_base_dir`). You just have to make sure that `{parameter_placeholder}` matches an input argument of `runner` and the values of `{parameter_placeholder}` are wrapped in a list. Checkout the [config example](./examples/config_example.json) for an illustrative example.
+            1) If the `type()` of the `parameter_placeholder` value is `bool` (see `augment` key in example config)
+            `True` corresponds to adding the `--parameter_placeholder` flag (i.e. `python my_runner.py
+            --parameter_placeholder`). `False` corresponds to omitting the flag from the `runner` call (i.e. `python
+            my_runner.py`). NOTE: Beware of inverted logic if parser argument uses `action=store_false`.
 
 3) Submit the hyper-parameter optimization
 
