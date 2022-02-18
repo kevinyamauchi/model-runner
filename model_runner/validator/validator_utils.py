@@ -5,6 +5,29 @@ from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, validator
 
 
+def which(program: str) -> Optional[str]:
+    """
+    Test if program is a file or an executable.
+    """
+
+    def is_exe(fpath):
+        return os.path.isfile(
+            fpath
+        )  # and os.access(fpath, os.X_OK) TODO: pytest fixture with executable permission
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
+
+
 class JobArrayModel(BaseModel):
     """
     pydantic BaseModel that handles the job_parameters.
@@ -180,12 +203,13 @@ class ConfigModel(BaseModel):
         return v
 
     @validator("runner")
-    def runner_is_file(cls, v):
+    def runner_exists(cls, v):
         """
-        Validate if "runner" is an existing file.
+        Validate if "runner" is an existing file or an executable.
         """
-        if not os.path.isfile(v):
-            raise ValueError('"runner" is not a file.')
+        runner_file = which(v)
+        if runner_file is None:
+            raise ValueError('"runner" is not a file and not an executable.')
         return v
 
 

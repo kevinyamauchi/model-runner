@@ -3,7 +3,7 @@ import pytest
 
 @pytest.fixture(scope="session")
 def base_config(tmp_path_factory):
-    my_file = tmp_path_factory.mktemp("data") / "myfile"
+    my_file = tmp_path_factory.mktemp("data") / "myfile.py"
     my_file.touch()
 
     config = {
