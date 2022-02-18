@@ -48,7 +48,11 @@ def create_run_command(params: Dict[str, Any]) -> str:
     except AssertionError:
         raise TypeError("'job_prefix' should be a string")
 
-    job_command = f"python {runner}"
+    if ".py" in runner:
+        job_command = f"python {runner}"
+    else:
+        job_command = f"{runner}"
+
     params["output_base_dir"] = f"{output_base_dir}{job_prefix}{job_index}/"
 
     for k, v in params.items():
