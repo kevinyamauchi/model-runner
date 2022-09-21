@@ -7,7 +7,9 @@ from .dispatcher_utils import create_run_command
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--job_id", help="the job ID from /$LSB_JOBINDEX", type=int)
+    parser.add_argument(
+        "--job_id", help="the job ID from /$SLURM_ARRAY_TASK_ID", type=int
+    )
     parser.add_argument("--params", help="path to the job params file", type=str)
     args = parser.parse_args()
 

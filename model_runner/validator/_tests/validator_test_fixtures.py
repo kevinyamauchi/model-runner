@@ -21,7 +21,7 @@ def base_config(tmp_path_factory):
             "ngpus": 2,
             "njobs_parallel": 4,
             "processor_cores": 16,
-            "run_time": "3:00",
+            "run_time": "3:00:00",
             "scratch": 4000,
         },
         "runner": my_file.as_posix(),

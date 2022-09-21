@@ -35,21 +35,21 @@ class JobArrayModel(BaseModel):
     Parameters
     ----------
     run_time: Union[str, int]
-        The time resources on the compute note are reservered for a single job. Corresponds to the bsub "-W"-flag.
+        The time resources on the compute note are reservered for a single job. Corresponds to the slurm sbatch "--time"-flag.
     processor_cores: int
-        Number of processor cores requested for a single job. Corresponds to the bsub "-n"-flag.
+        Number of processor cores requested for a single job. Corresponds to the slurm sbatch "--ntasks"-flag.
     memory: int
-        Amount of memory requested per processor core. Corresponds to bsub -R "rusage[mem={memory}]".
+        Amount of memory requested per processor core. Corresponds to slurm sbatch "--mem-per-cpu"-flag.
     scratch: int
-        Amount of local scratch requested per processor core. Corresponds to bsub -R "rusage[scratch={scratch}]".
+        Amount of local scratch requested per node. Corresponds to slurm sbatch "--tmp"-flag.
     gpu_type: str
-        Type of gpu that is accepted by bsub -R "select[gpu_model0=={gpu_type}]".
+        Type of gpu that is accepted by slurm sbatch "--gpus={gpu_type}:{ngpus}"-flag.
     ngpus: int
-        Number of GPUs of {gpu_type} requested. Corresponds to bsub -R "rusage[ngpus_excl_p={ngpus}]".
+        Number of GPUs of {gpu_type} requested. Corresponds to slurm sbatch "--gpus={gpu_type}:{ngpus}".
     njobs_parallel: int
         Number of jobs the job array will submit in parallel.
     logfile_dir: str
-        Path to directory to which lsf output files are saved.
+        Path to directory to which slurm output files are saved.
     """
 
     run_time: Union[str, int]
@@ -90,13 +90,15 @@ class JobArrayModel(BaseModel):
         (https://scicomp.ethz.ch/wiki/Getting_started_with_clusters#GPU).
         """
         gpu_list = [
-            "GeForceGTX1080",
-            "GeForceGTX1080Ti",
-            "GeForceRTX2080Ti",
+            "NVIDIAGeForceGTX1080",
+            "NVIDIAGeForceGTX1080Ti",
             "NVIDIAGeForceRTX2080Ti",
+            "NVIDIAGeForceRTX2080Ti",
+            "NVIDIAGeForceRTX3090",
             "NVIDIATITANRTX",
+            "QuadroRTX6000",
             "TeslaV100_SXM2_32GB",
-            "A100_PCIE_40GB",
+            "NVIDIAA100_PCIE_40GB",
         ]
 
         if v not in gpu_list:
@@ -110,40 +112,58 @@ class JobArrayModel(BaseModel):
     @validator("run_time")
     def validate_and_coerce_run_time(cls, v):
         """
-        Validate if submitted run_time adheres to the format specified in
-        https://scicomp.ethz.ch/wiki/Getting_started_with_clusters#Wall-clock_time.
+        Validate if submitted run_time adheres to the slurm format specified in
+        https://scicomp.ethz.ch/wiki/LSF_to_Slurm_quick_reference#Frequently_used_bsub.2Fsbatch_options.
         """
         if type(v) == str:
             v_split = v.split(":")
-            if len(v_split) == 1:
+            if "-" in v:
+                day_split = v.split("-")
+                sub_split = day_split[1].split[":"]
+
+                days = int(day_split[0])
+                hours = int(sub_split[0])
+
+                v = (24 * days + hours) * 60
+
+                if len(sub_split) == 2:
+                    minutes = int(sub_split[1])
+                    v += minutes
+                else:
+                    raise ValueError(
+                        "run_time string must adhere to the format specified in "
+                        "https://scicomp.ethz.ch/wiki/LSF_to_Slurm_quick_reference#Frequently_used_bsub.2Fsbatch_options."
+                    )
+            elif len(v_split) == 1:
                 try:
                     minutes = int(v_split[0])
                     v = minutes
                 except ValueError:
                     raise ValueError(
                         "run_time string must adhere to the format specified in "
-                        "https://scicomp.ethz.ch/wiki/Getting_started_with_clusters#Wall-clock_time."
+                        "https://scicomp.ethz.ch/wiki/LSF_to_Slurm_quick_reference#Frequently_used_bsub.2Fsbatch_options."
                     )
-            elif len(v_split) == 2:
+            elif len(v_split) == 3:
                 try:
-                    minutes = int(v_split[1])
+                    minutes = int(v_split[1])  # ignore seconds, no relevant use-case?
+                    hours = int(v_split[0])
+
                     if (minutes > 59) or (minutes < 0):
                         raise ValueError(
                             "run_time string must adhere to the format specified in "
-                            "https://scicomp.ethz.ch/wiki/Getting_started_with_clusters#Wall-clock_time."
+                            "https://scicomp.ethz.ch/wiki/LSF_to_Slurm_quick_reference#Frequently_used_bsub.2Fsbatch_options."
                         )
 
-                    hours = int(v_split[0])
                     v = minutes + hours * 60
                 except ValueError:
                     raise ValueError(
                         "run_time string must adhere to the format specified in "
-                        "https://scicomp.ethz.ch/wiki/Getting_started_with_clusters#Wall-clock_time."
+                        "https://scicomp.ethz.ch/wiki/LSF_to_Slurm_quick_reference#Frequently_used_bsub.2Fsbatch_options."
                     )
             else:
                 raise ValueError(
                     "run_time string must adhere to the format specified in "
-                    "https://scicomp.ethz.ch/wiki/Getting_started_with_clusters#Wall-clock_time."
+                    "https://scicomp.ethz.ch/wiki/LSF_to_Slurm_quick_reference#Frequently_used_bsub.2Fsbatch_options."
                 )
 
         return v

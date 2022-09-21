@@ -118,31 +118,18 @@ def _write_job_array(array_config: ConfigModel, runner_params_path: str) -> str:
     n_ids = len(runner_params)
 
     # write command str
-    job_array_command = f'bsub -J "{job_prefix}[1-{n_ids}]%{njobs_parallel}"'
-    job_array_command += f' -o "{logfile_dir}%I"'
-    job_array_command += f' -W "{run_time}"'
-    job_array_command += f' -n "{processor_cores}"'
+    job_array_command = f"sbatch --array=1-{n_ids}%{njobs_parallel}"
+    job_array_command += f" --output={logfile_dir}%a"
+    job_array_command += f" --time={run_time}"
+    job_array_command += f" --ntasks={processor_cores}"
+    job_array_command += f" --tmp={scratch}"
+    job_array_command += f" --mem-per-cpu={memory}"
 
-    if ngpus is None:
-        job_array_command += f' -R "rusage[scratch={scratch}, mem={memory}]"'
-    else:
-        job_array_command += (
-            f' -R "rusage[scratch={scratch}, mem={memory}, ngpus_excl_p={ngpus}]"'
-        )
+    if (ngpus is not None) and (gpu_type is None):
+        job_array_command += f" --gpus={ngpus}"
+    elif (ngpus is not None) and (gpu_type is not None):
+        job_array_command += f" --gpus={gpu_type}:{ngpus}"
 
-    if gpu_type is not None:
-        job_array_command += f' -R "select[gpu_model0=={gpu_type}]"'
-
-        # currently specifiers for RTX2080Ti specifiers vary depending on the GPU driver version. Furthermore,
-        # both old an new GPU drivers are currently installed on euler
-        # (see https://scicomp.ethz.ch/wiki/Change_of_GPU_specifiers_in_the_batch_system).
-        if gpu_type == "NVIDIAGeForceRTX2080Ti":
-            job_array_command += ' -R "select[gpu_driver>460]"'
-        elif gpu_type == "GeForceRTX2080Ti":
-            job_array_command += ' -R "select[gpu_driver<460]"'
-
-    job_array_command += (
-        f' "model_dispatcher --job_id \\$LSB_JOBINDEX --params {runner_params_path}"'
-    )
+    job_array_command += f' "model_dispatcher --job_id \\$SLURM_ARRAY_TASK_ID --params {runner_params_path}"'
 
     return job_array_command
