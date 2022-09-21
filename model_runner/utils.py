@@ -119,6 +119,7 @@ def _write_job_array(array_config: ConfigModel, runner_params_path: str) -> str:
 
     # write command str
     job_array_command = f"sbatch --array=1-{n_ids}%{njobs_parallel}"
+    job_array_command += f" --job-name={job_prefix}%a"
     job_array_command += f" --output={logfile_dir}%a"
     job_array_command += f" --time={run_time}"
     job_array_command += f" --ntasks={processor_cores}"

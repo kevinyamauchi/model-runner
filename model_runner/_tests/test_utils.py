@@ -148,6 +148,7 @@ def test_write_job_array(tmp_path_factory, base_config):
 
     job_array_command = _write_job_array(config_model, runner_params_path)
     expected_command = "sbatch --array=1-12%4"
+    expected_command += " --job-name=my_experiment%a"
     expected_command += f" --output={logfile_dir}%a"
     expected_command += " --time=180"
     expected_command += " --ntasks=16"
@@ -167,6 +168,7 @@ def test_write_job_array(tmp_path_factory, base_config):
 
     job_array_command = _write_job_array(config_model, runner_params_path)
     expected_command = "sbatch --array=1-12%4"
+    expected_command += " --job-name=my_experiment%a"
     expected_command += f" --output={logfile_dir}%a"
     expected_command += " --time=180"
     expected_command += " --ntasks=16"
