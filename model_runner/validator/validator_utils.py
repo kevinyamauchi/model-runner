@@ -90,15 +90,15 @@ class JobArrayModel(BaseModel):
         (https://scicomp.ethz.ch/wiki/Getting_started_with_clusters#GPU).
         """
         gpu_list = [
-            "NVIDIAGeForceGTX1080",
-            "NVIDIAGeForceGTX1080Ti",
-            "NVIDIAGeForceRTX2080Ti",
-            "NVIDIAGeForceRTX2080Ti",
-            "NVIDIAGeForceRTX3090",
-            "NVIDIATITANRTX",
-            "QuadroRTX6000",
-            "TeslaV100_SXM2_32GB",
-            "NVIDIAA100_PCIE_40GB",
+            "gtx_1080",
+            "gtx_1080_ti",
+            "rtx_2080_ti",
+            "rtx_3090",
+            "titan_rtx",
+            "quadro_rtx_6000",
+            "v100",
+            "a100_40gb",
+            "a100_80gb",
         ]
 
         if v not in gpu_list:
