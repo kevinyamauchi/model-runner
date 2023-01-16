@@ -92,7 +92,7 @@ def test_write_runner_params(tmp_path_factory):
         "job_prefix": job_prefix,
         "runner_parameters": params,
         "job_parameters": {
-            "gpu_type": "NVIDIATITANRTX",
+            "gpu_type": "titan_rtx",
             "logfile_dir": tmp_path_factory._basetemp.as_posix(),
             "memory": 4000,
             "ngpus": 2,
@@ -154,7 +154,7 @@ def test_write_job_array(tmp_path_factory, base_config):
     expected_command += " --ntasks=16"
     expected_command += " --tmp=4000"
     expected_command += " --mem-per-cpu=4000"
-    expected_command += " --gpus=NVIDIATITANRTX:2"
+    expected_command += " --gpus=titan_rtx:2"
     expected_command += f' "model_dispatcher --job_id \\$SLURM_ARRAY_TASK_ID --params {runner_params_path}"'
 
     assert expected_command == job_array_command
