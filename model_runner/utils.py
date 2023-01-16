@@ -131,6 +131,6 @@ def _write_job_array(array_config: ConfigModel, runner_params_path: str) -> str:
     elif (ngpus is not None) and (gpu_type is not None):
         job_array_command += f" --gpus={gpu_type}:{ngpus}"
 
-    job_array_command += f' "model_dispatcher --job_id \\$SLURM_ARRAY_TASK_ID --params {runner_params_path}"'
+    job_array_command += f' --wrap="model_dispatcher --job_id \\$SLURM_ARRAY_TASK_ID --params {runner_params_path}"'
 
     return job_array_command

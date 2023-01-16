@@ -1,8 +1,6 @@
 import argparse
 import os
 
-import ipdb
-
 from .utils import _write_job_array, _write_runner_params
 from .validator import _validation_func
 
@@ -18,8 +16,6 @@ def _parse_args():
 def main():
     args = _parse_args()
     validated_parameters = _validation_func(args.params)
-
-    ipdb.set_trace()
 
     # create and write the runner params
     runner_params_fname = f"{validated_parameters.job_prefix}_runner_parameters.json"
